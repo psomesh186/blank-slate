@@ -22,6 +22,12 @@ class BlankSlate(tk.Tk):
         self.add_frame(HostGame)
         self.add_frame(JoinGame)
 
+        # Loading cards
+        with open('cards.txt') as f:
+            cards = [line.strip() for line in f.readlines()]
+            self.white_cards = cards[:250]
+            self.black_cards = cards[250:]
+
         # Displaying homepage
         self.switch_frame(HomePage)
 
