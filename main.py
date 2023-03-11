@@ -1,10 +1,13 @@
+from doctest import Example
+from email.policy import strict
+import random
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 
 class BlankSlate(tk.Tk):
     '''Creates main application frame and provides frame switching'''
-
+    cards = []
     def __init__(self):
         tk.Tk.__init__(self)
         self.title("Blank Slate")
@@ -16,15 +19,16 @@ class BlankSlate(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
+        # Loading cards
+        with open('cards.txt') as f:
+            BlankSlate.cards = [line.strip() for line in f.readlines()]
+
         # Storing different frames
         self.frames = {}
         self.add_frame(HomePage)
         self.add_frame(HostGame)
         self.add_frame(JoinGame)
-
-        # Loading cards
-        with open('cards.txt') as f:
-            self.cards = [line.strip() for line in f.readlines()]
+        self.add_frame(PlayGame)
 
         # Displaying homepage
         self.switch_frame(HomePage)
@@ -79,6 +83,7 @@ class HomePage(tk.Frame):
         '''Switch to join game frame'''
         self.controller.switch_frame(JoinGame)
 
+
 class HostGame(tk.Frame):
     '''Creates the frame with game hosting controls'''
     
@@ -117,10 +122,11 @@ class HostGame(tk.Frame):
         pass
 
     def start_game(self):
-        pass
+        self.controller.switch_frame(PlayGame)
 
     def go_to_home(self):
         self.controller.switch_frame(HomePage)
+
 
 class JoinGame(tk.Frame):
     '''Creates the frame with game joining controls'''
@@ -140,7 +146,7 @@ class JoinGame(tk.Frame):
         # Display Available lobbies to join
         self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
         for i in range(4):
-            lobby = ttk.Button(self.lobby_frame, text=f"Player {i}")
+            lobby = ttk.Button(self.lobby_frame, text=f"Player {i}", command=self.start_game)
             lobby.pack()
         self.lobby_frame.pack(padx=20, pady=10, expand=tk.YES, fill=tk.BOTH)
         
@@ -152,6 +158,45 @@ class JoinGame(tk.Frame):
 
     def go_to_home(self):
         self.controller.switch_frame(HomePage)
+
+    def start_game(self):
+        self.controller.switch_frame(PlayGame)
+
+class PlayGame(tk.Frame):
+    '''Creates the frame where the game is played'''
+    
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        self.players = {}
+
+        score_frame = tk.Frame(self)
+        label = ttk.Label(score_frame, text=f"Player Scores")
+        label.pack()
+        for i in range(4):
+            self.players[i] = ttk.Label(score_frame, text=f"Player {i}: 0")
+            self.players[i].pack()
+        score_frame.pack(side=tk.LEFT, fill=tk.Y, padx=20, pady=10)
+
+        game_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
+        self.current_card = ttk.Label(game_frame, text=f"{random.choice(BlankSlate.cards)}", font=("Helvetica", 30, "bold"))
+        self.current_card.pack(pady=20)
+        self.answer = ttk.Entry(game_frame, font=("Helvetica", 30, "bold"))
+        self.answer.pack(pady=20)
+        self.submit_button = ttk.Button(game_frame, text="Submit")
+        self.submit_button.pack(pady=20)
+
+        self.player_frame = tk.Frame(game_frame)
+        label = ttk.Label(self.player_frame, text=f"Player1: Word1\nPlayer2: Word1")
+        label.pack(side=tk.LEFT, padx=20)
+        for i in range(2):
+            label = ttk.Label(self.player_frame, text=f"Player{i+3}: Word{i+2}")
+            label.pack(side=tk.LEFT, padx=20)
+
+        self.player_frame.pack(padx=20, pady=10)
+        game_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+
 
 if __name__ == '__main__':
     app = BlankSlate()
