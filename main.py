@@ -98,22 +98,29 @@ class HostGame(tk.Frame):
         host_frame.pack()
 
         # Lobby details
-        self.lobby_frame = tk.Frame(self) # This Frame needs to be scrollable and dynamic
+        self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2) # This Frame needs to be scrollable and dynamic
         self.lobby_label = ttk.Label(self.lobby_frame, text=f"<Host Name>'s Lobby")
         self.lobby_label.pack()
         for i in range(4):
             player = ttk.Label(self.lobby_frame, text=f"Player {i}")
             player.pack()
-
-        self.start_button = ttk.Button(self.lobby_frame, text="Start Game", command=self.start_game)
-        self.start_button.pack()
-        self.lobby_frame.pack(padx=50, pady=50)
+        self.lobby_frame.pack(padx=20, pady=10, expand=tk.YES, fill=tk.BOTH)
+        
+        button_frame = tk.Frame(self)
+        start_button = ttk.Button(button_frame, text="Start Game", command=self.start_game)
+        start_button.pack(side=tk.LEFT, padx=20)
+        home_button = ttk.Button(button_frame, text="Home Page", command=self.go_to_home)
+        home_button.pack(side=tk.LEFT, padx=20)
+        button_frame.pack(pady=10)
 
     def host_game(self):
         pass
 
     def start_game(self):
         pass
+
+    def go_to_home(self):
+        self.controller.switch_frame(HomePage)
 
 class JoinGame(tk.Frame):
     '''Creates the frame with game joining controls'''
