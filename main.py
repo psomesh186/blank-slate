@@ -86,7 +86,7 @@ class HostGame(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        # Get Host Name and host a lobby
+        # Get host name and host a lobby
         host_frame = tk.Frame(self)
         label = ttk.Label(host_frame, text="Enter Username:")
         label.pack(side=tk.LEFT, padx=20)
@@ -94,11 +94,10 @@ class HostGame(tk.Frame):
         self.host_name.pack(side=tk.LEFT, padx=20)
         self.host_button = ttk.Button(host_frame, text="Host Game", command=self.host_game)
         self.host_button.pack(side=tk.LEFT, padx=20)
-        self.host_name.pack(side=tk.LEFT, padx=20)
         host_frame.pack()
 
         # Lobby details
-        self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2) # This Frame needs to be scrollable and dynamic
+        self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
         self.lobby_label = ttk.Label(self.lobby_frame, text=f"<Host Name>'s Lobby")
         self.lobby_label.pack()
         for i in range(4):
@@ -106,6 +105,7 @@ class HostGame(tk.Frame):
             player.pack()
         self.lobby_frame.pack(padx=20, pady=10, expand=tk.YES, fill=tk.BOTH)
         
+        # Control buttons frame
         button_frame = tk.Frame(self)
         start_button = ttk.Button(button_frame, text="Start Game", command=self.start_game)
         start_button.pack(side=tk.LEFT, padx=20)
@@ -129,9 +129,29 @@ class JoinGame(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        label = ttk.Label(self, text="Join a Game")
-        label.pack()
+        # Get participant name and join a lobby
+        participant_frame = tk.Frame(self)
+        label = ttk.Label(participant_frame, text="Enter Username:")
+        label.pack(side=tk.LEFT, padx=20)
+        self.participant_name = ttk.Entry(participant_frame)
+        self.participant_name.pack(side=tk.LEFT, padx=20)
+        participant_frame.pack()
 
+        # Display Available lobbies to join
+        self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
+        for i in range(4):
+            lobby = ttk.Button(self.lobby_frame, text=f"Player {i}")
+            lobby.pack()
+        self.lobby_frame.pack(padx=20, pady=10, expand=tk.YES, fill=tk.BOTH)
+        
+        # Control buttons frame
+        button_frame = tk.Frame(self)
+        home_button = ttk.Button(button_frame, text="Home Page", command=self.go_to_home)
+        home_button.pack()
+        button_frame.pack(pady=10)
+
+    def go_to_home(self):
+        self.controller.switch_frame(HomePage)
 
 if __name__ == '__main__':
     app = BlankSlate()
