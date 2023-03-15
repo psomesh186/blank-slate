@@ -4,6 +4,9 @@ import random
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from network import server, client
+import threading
+
 
 class BlankSlate(tk.Tk):
     '''Creates main application frame and provides frame switching'''
@@ -25,16 +28,18 @@ class BlankSlate(tk.Tk):
 
         # Storing different frames
         self.frames = {}
-        self.add_frame(HomePage)
-        self.add_frame(HostGame)
-        self.add_frame(JoinGame)
-        self.add_frame(PlayGame)
+        self.add_frame(HomePage, "HomePage")
+        self.add_frame(HostGame, "HostGame")
+        self.add_frame(JoinGame, "JoinGame")
+        self.add_frame(PlayGame, "PlayGame")
 
         # Displaying homepage
-        self.switch_frame(HomePage)
+        self.switch_frame("HomePage")
 
-    def add_frame(self, frame_name):
-        frame = frame_name(self.container, self)
+        self.lobby = None
+
+    def add_frame(self, frame_class, frame_name):
+        frame = frame_class(self.container, self)
         self.frames[frame_name] = frame
         frame.grid(row=0, column=0, sticky="nsew")
 
@@ -77,11 +82,11 @@ class HomePage(tk.Frame):
 
     def host_game(self):
         '''Switch to host game frame'''
-        self.controller.switch_frame(HostGame)
+        self.controller.switch_frame("HostGame")
 
     def join_game(self):
         '''Switch to join game frame'''
-        self.controller.switch_frame(JoinGame)
+        self.controller.switch_frame("JoinGame")
 
 
 class HostGame(tk.Frame):
@@ -103,29 +108,34 @@ class HostGame(tk.Frame):
 
         # Lobby details
         self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
-        self.lobby_label = ttk.Label(self.lobby_frame, text=f"<Host Name>'s Lobby")
-        self.lobby_label.pack()
-        for i in range(4):
-            player = ttk.Label(self.lobby_frame, text=f"Player {i}")
-            player.pack()
         self.lobby_frame.pack(padx=20, pady=10, expand=tk.YES, fill=tk.BOTH)
         
         # Control buttons frame
         button_frame = tk.Frame(self)
-        start_button = ttk.Button(button_frame, text="Start Game", command=self.start_game)
+        start_button = ttk.Button(button_frame, text="Start Game", command=self.start_game, state=tk.DISABLED)
         start_button.pack(side=tk.LEFT, padx=20)
         home_button = ttk.Button(button_frame, text="Home Page", command=self.go_to_home)
         home_button.pack(side=tk.LEFT, padx=20)
         button_frame.pack(pady=10)
 
     def host_game(self):
-        pass
+        self.controller.lobby = server.Server(self.host_name.get(), self.controller)
+        self.host_button.config({"state": tk.DISABLED})
+        self.lobby_label = ttk.Label(self.lobby_frame, text=f"{self.host_name.get()}'s Lobby")
+        self.lobby_label.pack()
+        threading.Thread(target=self.controller.lobby.accept_players).start()
+        print("Hello")
 
+    def add_player(self, player_name):
+        self.lobby_label = ttk.Label(self.lobby_frame, text=f"{player_name}")
+        self.lobby_label.pack()
+    
     def start_game(self):
-        self.controller.switch_frame(PlayGame)
+        self.controller.lobby.start_game()
+        self.controller.switch_frame("PlayGame")
 
     def go_to_home(self):
-        self.controller.switch_frame(HomePage)
+        self.controller.switch_frame("HomePage")
 
 
 class JoinGame(tk.Frame):
@@ -141,13 +151,12 @@ class JoinGame(tk.Frame):
         label.pack(side=tk.LEFT, padx=20)
         self.participant_name = ttk.Entry(participant_frame)
         self.participant_name.pack(side=tk.LEFT, padx=20)
+        self.join_button = ttk.Button(participant_frame, text="Join Game", command=self.join_game)
+        self.join_button.pack(side=tk.LEFT, padx=20)
         participant_frame.pack()
 
         # Display Available lobbies to join
         self.lobby_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
-        for i in range(4):
-            lobby = ttk.Button(self.lobby_frame, text=f"Player {i}", command=self.start_game)
-            lobby.pack()
         self.lobby_frame.pack(padx=20, pady=10, expand=tk.YES, fill=tk.BOTH)
         
         # Control buttons frame
@@ -157,10 +166,21 @@ class JoinGame(tk.Frame):
         button_frame.pack(pady=10)
 
     def go_to_home(self):
-        self.controller.switch_frame(HomePage)
+        self.controller.switch_frame("HomePage")
 
-    def start_game(self):
-        self.controller.switch_frame(PlayGame)
+    def join_game(self):
+        self.join_button.config({"state": tk.DISABLED})
+        self.controller.lobby = client.Client(self.participant_name.get(), self.controller)
+        threading.Thread(target=self.controller.lobby.get_hosts).start()
+
+    def add_lobby(self, lobby_name, host):
+        lobby = ttk.Button(master=self.lobby_frame, text=f"{lobby_name}", command=lambda host=host: self.start_game(host))
+        lobby.pack()
+        self.lobby_frame.pack()
+
+    def start_game(self, host):
+        self.controller.lobby.join_lobby(host)
+        self.controller.switch_frame("PlayGame")
 
 class PlayGame(tk.Frame):
     '''Creates the frame where the game is played'''
