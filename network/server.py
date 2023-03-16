@@ -61,11 +61,8 @@ class Server:
                 else:
                     if reply["Signal"] == "name":
                         self.controller.frames["HostGame"].add_player(reply["name"])
-            except ArithmeticError:
-                pass
-            #except Exception as e:
-            #    print(e)
-            #    break
+            except socket.error:
+                break
 
         print("Connection closed")
         self.player_details[player_id]["conn"].close()
@@ -77,9 +74,8 @@ class Server:
             conn, addr = self.s.accept()
             print("Connected to: ", addr)
             self.player_details[addr] = {"conn": conn, "addr": addr}
-            thread = threading.Thread(target=self.threaded_client(addr))
+            thread = threading.Thread(target=self.threaded_client, kwargs={"player_id": addr})
             thread.start()
-            print(self.player_details)
 
     def start_game(self):
         self.STOP_BROADCAST = True

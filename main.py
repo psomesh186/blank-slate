@@ -31,6 +31,7 @@ class BlankSlate(tk.Tk):
         self.add_frame(HomePage, "HomePage")
         self.add_frame(HostGame, "HostGame")
         self.add_frame(JoinGame, "JoinGame")
+        self.add_frame(WaitFrame, "WaitFrame")
         self.add_frame(PlayGame, "PlayGame")
 
         # Displaying homepage
@@ -180,7 +181,17 @@ class JoinGame(tk.Frame):
 
     def start_game(self, host):
         self.controller.lobby.join_lobby(host)
-        self.controller.switch_frame("PlayGame")
+        self.controller.switch_frame("WaitFrame")
+
+
+class WaitFrame(tk.Frame):
+    '''Waiting screen till host starts the game'''
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = ttk.Label(self, text=f"Waiting for host to start the game...", font=("Helvetica", 45, "bold"))
+        label.pack()
+
 
 class PlayGame(tk.Frame):
     '''Creates the frame where the game is played'''
