@@ -36,9 +36,25 @@ class Client:
                 pass
         broadcastSocket.close()
 
+    def listen_to_host(self):
+        while True:
+            try:
+                data = self.s.recv(1024)
+                if not data:
+                    break
+                reply = json.loads(data.decode())
+                if reply["Signal"] == "Player info":
+                    self.controller.add_players(reply["Player info"], reply["Player ID"])
+                    self.controller.switch_frame("PlayGame")
+                if reply["Signal"] == "Card":
+                    self.controller.frames["PlayGame"].set_card(reply["Card Index"])
+            except socket.error:
+                break
+
     def join_lobby(self, host):
         self.STOP_FIND = True
         self.host = self.hosts[host]
         self.s.connect((self.host["host"], self.host["port"]))
         msg = str.encode(json.dumps({"Signal": "name", "name": self.client_name}))
         self.s.send(msg)
+        threading.Thread(target=self.listen_to_host).start()

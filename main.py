@@ -6,6 +6,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from network import server, client
 import threading
+import collections
 
 
 class BlankSlate(tk.Tk):
@@ -22,22 +23,19 @@ class BlankSlate(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
-        # Loading cards
-        with open('cards.txt') as f:
-            BlankSlate.cards = [line.strip() for line in f.readlines()]
-
         # Storing different frames
         self.frames = {}
         self.add_frame(HomePage, "HomePage")
         self.add_frame(HostGame, "HostGame")
         self.add_frame(JoinGame, "JoinGame")
         self.add_frame(WaitFrame, "WaitFrame")
-        self.add_frame(PlayGame, "PlayGame")
 
         # Displaying homepage
         self.switch_frame("HomePage")
 
         self.lobby = None
+        self.players = collections.defaultdict(dict)
+        self.id = None
 
     def add_frame(self, frame_class, frame_name):
         frame = frame_class(self.container, self)
@@ -48,6 +46,10 @@ class BlankSlate(tk.Tk):
         frame = self.frames[frame_name]
         frame.tkraise()
 
+    def add_players(self, player_details, player_id):
+        self.players = player_details
+        self.id = player_id
+        self.add_frame(PlayGame, "PlayGame")
 
 class HomePage(tk.Frame):
     '''Creates the homepage of the game'''
@@ -113,26 +115,33 @@ class HostGame(tk.Frame):
         
         # Control buttons frame
         button_frame = tk.Frame(self)
-        start_button = ttk.Button(button_frame, text="Start Game", command=self.start_game, state=tk.DISABLED)
-        start_button.pack(side=tk.LEFT, padx=20)
+        self.start_button = ttk.Button(button_frame, text="Start Game", command=self.start_game, state=tk.DISABLED)
+        self.start_button.pack(side=tk.LEFT, padx=20)
         home_button = ttk.Button(button_frame, text="Home Page", command=self.go_to_home)
         home_button.pack(side=tk.LEFT, padx=20)
         button_frame.pack(pady=10)
+        self.player_details = collections.defaultdict(dict)
 
     def host_game(self):
         self.controller.lobby = server.Server(self.host_name.get(), self.controller)
         self.host_button.config({"state": tk.DISABLED})
         self.lobby_label = ttk.Label(self.lobby_frame, text=f"{self.host_name.get()}'s Lobby")
         self.lobby_label.pack()
+        self.player_details["Host"]["name"] = self.host_name.get()
+        self.player_details["Host"]["score"] = 0
         threading.Thread(target=self.controller.lobby.accept_players).start()
-        print("Hello")
+        self.start_button.config(state=tk.ACTIVE)
 
-    def add_player(self, player_name):
+    def add_player(self, player_name, player_id):
         self.lobby_label = ttk.Label(self.lobby_frame, text=f"{player_name}")
         self.lobby_label.pack()
+        self.player_details[player_id]["name"] = player_name
+        self.player_details[player_id]["score"] = 0
     
     def start_game(self):
-        self.controller.lobby.start_game()
+        self.controller.add_players(self.player_details, "Host")
+        self.controller.lobby.start_game(self.player_details)
+        self.controller.frames["PlayGame"].choose_card()
         self.controller.switch_frame("PlayGame")
 
     def go_to_home(self):
@@ -200,18 +209,31 @@ class PlayGame(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        self.players = {}
+        # Loading cards
+        with open('cards.txt') as f:
+            self.cards = [line.strip() for line in f.readlines()]
+        self.card_idx = list(range(len(self.cards)))
+        random.shuffle(self.card_idx)
+        self.current_idx = 0
 
         score_frame = tk.Frame(self)
+        self.score_labels = {}
         label = ttk.Label(score_frame, text=f"Player Scores")
         label.pack()
-        for i in range(4):
-            self.players[i] = ttk.Label(score_frame, text=f"Player {i}: 0")
-            self.players[i].pack()
+        for player in self.controller.players:
+            player_frame = tk.Frame(score_frame)
+            player_name = ttk.Label(player_frame, text=f"{self.controller.players[player]['name']}: ")
+            if player == self.controller.id:
+                player_name.config(foreground="red")
+            self.score_labels[player] = ttk.Label(player_frame, text=f"{self.controller.players[player]['score']}")
+            player_name.pack(side=tk.LEFT)
+            self.score_labels[player].pack(side=tk.LEFT)
+            player_frame.pack()
+        
         score_frame.pack(side=tk.LEFT, fill=tk.Y, padx=20, pady=10)
 
         game_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
-        self.current_card = ttk.Label(game_frame, text=f"{random.choice(BlankSlate.cards)}", font=("Helvetica", 30, "bold"))
+        self.current_card = ttk.Label(game_frame, text=f"", font=("Helvetica", 30, "bold"))
         self.current_card.pack(pady=20)
         self.answer = ttk.Entry(game_frame, font=("Helvetica", 30, "bold"))
         self.answer.pack(pady=20)
@@ -227,6 +249,15 @@ class PlayGame(tk.Frame):
 
         self.player_frame.pack(padx=20, pady=10)
         game_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+
+    def choose_card(self):
+        card_idx = self.card_idx[self.current_idx]
+        self.current_idx += 1
+        self.controller.lobby.send_card(card_idx)
+        self.set_card(card_idx)
+
+    def set_card(self, card_idx):
+        self.current_card.config(text=f"{self.cards[card_idx]}")
 
 
 if __name__ == '__main__':

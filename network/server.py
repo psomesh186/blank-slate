@@ -60,7 +60,7 @@ class Server:
                     break
                 else:
                     if reply["Signal"] == "name":
-                        self.controller.frames["HostGame"].add_player(reply["name"])
+                        self.controller.frames["HostGame"].add_player(reply["name"], player_id)
             except socket.error:
                 break
 
@@ -73,10 +73,22 @@ class Server:
                 break
             conn, addr = self.s.accept()
             print("Connected to: ", addr)
-            self.player_details[addr] = {"conn": conn, "addr": addr}
-            thread = threading.Thread(target=self.threaded_client, kwargs={"player_id": addr})
+            self.player_details[str(addr)] = {"conn": conn, "addr": addr}
+            thread = threading.Thread(target=self.threaded_client, kwargs={"player_id": str(addr)})
             thread.start()
 
-    def start_game(self):
+    def start_game(self, game_info):
         self.STOP_BROADCAST = True
         self.STOP_ACCEPT = True
+        for player in self.player_details:
+            self.player_details[player]["conn"].send(str.encode(json.dumps({
+                "Signal": "Player info", 
+                "Player info": game_info,
+                "Player ID": player})))
+    
+    def send_card(self, card_idx):
+        for player in self.player_details:
+            self.player_details[player]["conn"].send(str.encode(json.dumps({
+                "Signal": "Card",
+                "Card Index": card_idx
+            })))
