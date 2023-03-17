@@ -101,3 +101,10 @@ class Server:
                 "Signal": "Update Submission",
                 "Player": player_id
             })))
+
+    def send_results(self, result):
+        for player in self.player_details:
+            self.player_details[player]["conn"].send(str.encode(json.dumps({
+                "Signal": "Results",
+                "Result": result
+            })))

@@ -263,9 +263,11 @@ class PlayGame(tk.Frame):
 
     def receive_word(self, word, player):
         self.answers[player] = word
+        if len(self.answers) == len(self.controller.players):
+            self.process_results()
+            return
         self.controller.lobby.update_submission(player)
         self.update_submission(player)
-        print(self.answers)
 
     def submit_word(self):
         self.submit_button.configure(state=tk.DISABLED)
@@ -273,6 +275,34 @@ class PlayGame(tk.Frame):
             self.receive_word(self.answer.get(), "Host")
         else:
             self.controller.lobby.send_word(self.answer.get())
+
+    def process_results(self):
+        words = {}
+        result = {}
+        for player, word in self.answers.items():
+            word = word.lower()
+            if word in words:
+                words[word].append(player)
+            else:
+                words[word] = [player]
+        for word, players in words.items():
+            if len(players) > 2:
+                color = 'b'
+                reward = 1
+            elif len(players) == 2:
+                color = 'g'
+                reward = 3
+            else:
+                color = 'w'
+                reward = 0
+            for player in players:
+                self.controller.players[player]["score"] += reward
+                result[player] = [word, color, self.controller.players[player]["score"]]
+        self.show_results(result)
+        self.controller.lobby.send_results(result)
+
+    def show_results(self, result):
+        print(result)
 
 
 if __name__ == '__main__':

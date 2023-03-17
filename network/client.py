@@ -50,6 +50,8 @@ class Client:
                     self.controller.frames["PlayGame"].set_card(reply["Card Index"])
                 elif reply["Signal"] == "Update Submission":
                     self.controller.frames["PlayGame"].update_submission(reply["Player"])
+                elif reply["Signal"] == "Results":
+                    self.controller.frames["PlayGame"].show_results(reply["Result"])
             except socket.error:
                 break
 
