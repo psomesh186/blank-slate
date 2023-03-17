@@ -237,18 +237,17 @@ class PlayGame(tk.Frame):
         self.current_card.pack(pady=20)
         self.answer = ttk.Entry(game_frame, font=("Helvetica", 30, "bold"))
         self.answer.pack(pady=20)
-        self.submit_button = ttk.Button(game_frame, text="Submit")
+        self.submit_button = ttk.Button(game_frame, text="Submit", command=self.submit_word)
         self.submit_button.pack(pady=20)
 
         self.player_frame = tk.Frame(game_frame)
-        label = ttk.Label(self.player_frame, text=f"Player1: Word1\nPlayer2: Word1")
-        label.pack(side=tk.LEFT, padx=20)
-        for i in range(2):
-            label = ttk.Label(self.player_frame, text=f"Player{i+3}: Word{i+2}")
-            label.pack(side=tk.LEFT, padx=20)
-
+        self.submission_labels = {}
+        for player in self.controller.players:
+            self.submission_labels[player] = ttk.Label(self.player_frame, text=f"{self.controller.players[player]['name']}")
+            self.submission_labels[player].pack(side=tk.LEFT)
         self.player_frame.pack(padx=20, pady=10)
         game_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+        self.answers = {}
 
     def choose_card(self):
         card_idx = self.card_idx[self.current_idx]
@@ -258,6 +257,22 @@ class PlayGame(tk.Frame):
 
     def set_card(self, card_idx):
         self.current_card.config(text=f"{self.cards[card_idx]}")
+
+    def update_submission(self, player):
+        self.submission_labels[player].configure(foreground="green")
+
+    def receive_word(self, word, player):
+        self.answers[player] = word
+        self.controller.lobby.update_submission(player)
+        self.update_submission(player)
+        print(self.answers)
+
+    def submit_word(self):
+        self.submit_button.configure(state=tk.DISABLED)
+        if self.controller.id == "Host":
+            self.receive_word(self.answer.get(), "Host")
+        else:
+            self.controller.lobby.send_word(self.answer.get())
 
 
 if __name__ == '__main__':

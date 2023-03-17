@@ -61,6 +61,8 @@ class Server:
                 else:
                     if reply["Signal"] == "name":
                         self.controller.frames["HostGame"].add_player(reply["name"], player_id)
+                    elif reply["Signal"] == "Submission":
+                        self.controller.frames["PlayGame"].receive_word(reply["Word"], player_id)
             except socket.error:
                 break
 
@@ -91,4 +93,11 @@ class Server:
             self.player_details[player]["conn"].send(str.encode(json.dumps({
                 "Signal": "Card",
                 "Card Index": card_idx
+            })))
+    
+    def update_submission(self, player_id):
+        for player in self.player_details:
+            self.player_details[player]["conn"].send(str.encode(json.dumps({
+                "Signal": "Update Submission",
+                "Player": player_id
             })))

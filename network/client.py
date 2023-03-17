@@ -46,8 +46,10 @@ class Client:
                 if reply["Signal"] == "Player info":
                     self.controller.add_players(reply["Player info"], reply["Player ID"])
                     self.controller.switch_frame("PlayGame")
-                if reply["Signal"] == "Card":
+                elif reply["Signal"] == "Card":
                     self.controller.frames["PlayGame"].set_card(reply["Card Index"])
+                elif reply["Signal"] == "Update Submission":
+                    self.controller.frames["PlayGame"].update_submission(reply["Player"])
             except socket.error:
                 break
 
@@ -58,3 +60,7 @@ class Client:
         msg = str.encode(json.dumps({"Signal": "name", "name": self.client_name}))
         self.s.send(msg)
         threading.Thread(target=self.listen_to_host).start()
+
+    def send_word(self, word):
+        msg = str.encode(json.dumps({"Signal": "Submission", "Word": word}))
+        self.s.send(msg)
