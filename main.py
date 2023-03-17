@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 from network import server, client
 import threading
 import collections
+import time
 
 
 class BlankSlate(tk.Tk):
@@ -141,6 +142,7 @@ class HostGame(tk.Frame):
     def start_game(self):
         self.controller.add_players(self.player_details, "Host")
         self.controller.lobby.start_game(self.player_details)
+        time.sleep(0.1)
         self.controller.frames["PlayGame"].choose_card()
         self.controller.switch_frame("PlayGame")
 
