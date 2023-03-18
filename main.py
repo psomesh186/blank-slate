@@ -234,22 +234,32 @@ class PlayGame(tk.Frame):
         
         score_frame.pack(side=tk.LEFT, fill=tk.Y, padx=20, pady=10)
 
-        game_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
-        self.current_card = ttk.Label(game_frame, text=f"", font=("Helvetica", 30, "bold"))
+        self.game_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
+        self.current_card = ttk.Label(self.game_frame, text=f"", font=("Helvetica", 30, "bold"))
         self.current_card.pack(pady=20)
-        self.answer = ttk.Entry(game_frame, font=("Helvetica", 30, "bold"))
+        self.answer = ttk.Entry(self.game_frame, font=("Helvetica", 30, "bold"))
         self.answer.pack(pady=20)
-        self.submit_button = ttk.Button(game_frame, text="Submit", command=self.submit_word)
+        self.submit_button = ttk.Button(self.game_frame, text="Submit", command=self.submit_word)
         self.submit_button.pack(pady=20)
 
-        self.player_frame = tk.Frame(game_frame)
+        self.player_frame = tk.Frame(self.game_frame)
         self.submission_labels = {}
         for player in self.controller.players:
             self.submission_labels[player] = ttk.Label(self.player_frame, text=f"{self.controller.players[player]['name']}")
             self.submission_labels[player].pack(side=tk.LEFT)
         self.player_frame.pack(padx=20, pady=10)
-        game_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+        self.game_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+        self.result_frame = tk.Frame(self, highlightbackground="blue", highlightthickness=2)
+        self.result_labels = {}
+        for player in self.controller.players:
+            result_label_frame = tk.Frame(self.result_frame)
+            name = ttk.Label(result_label_frame, text=f"{self.controller.players[player]['name']}: ", font=("Helvetica", 30, "bold"))
+            self.result_labels[player] = ttk.Label(result_label_frame, font=("Helvetica", 30, "italic"))
+            name.pack(side=tk.LEFT)
+            self.result_labels[player].pack(side=tk.LEFT)
+            result_label_frame.pack()
         self.answers = {}
+        self.color_map = {"w": "white", "b": "blue", "g": "green"}
 
     def choose_card(self):
         card_idx = self.card_idx[self.current_idx]
@@ -304,7 +314,12 @@ class PlayGame(tk.Frame):
         self.controller.lobby.send_results(result)
 
     def show_results(self, result):
-        print(result)
+        self.game_frame.pack_forget()
+        self.result_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        for player in self.controller.players:
+            self.result_labels[player].configure(text=f"{result[player][0]}", foreground=self.color_map[result[player][1]])
+            self.score_labels[player].configure(text=f"{result[player][2]}")
 
 
 if __name__ == '__main__':
