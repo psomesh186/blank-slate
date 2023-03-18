@@ -198,7 +198,7 @@ class WaitFrame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = ttk.Label(self, text=f"Waiting for host to start the game...", font=("Helvetica", 45, "bold"))
+        label = ttk.Label(self, text=f"Waiting for host to start the game...", font=("Helvetica", 45, "bold"), wraplength=700)
         label.pack()
 
 
