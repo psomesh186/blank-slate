@@ -131,7 +131,7 @@ class HostGame(tk.Frame):
         self.player_details["Host"]["name"] = self.host_name.get()
         self.player_details["Host"]["score"] = 0
         threading.Thread(target=self.controller.lobby.accept_players).start()
-        self.start_button.config(state=tk.ACTIVE)
+        self.start_button.config(state=tk.NORMAL)
 
     def add_player(self, player_name, player_id):
         self.lobby_label = ttk.Label(self.lobby_frame, text=f"{player_name}")
@@ -258,6 +258,9 @@ class PlayGame(tk.Frame):
             name.pack(side=tk.LEFT)
             self.result_labels[player].pack(side=tk.LEFT)
             result_label_frame.pack()
+        if self.controller.id == "Host":
+            next_round_button = ttk.Button(self.result_frame, text="Next Round", command=self.choose_card)
+            next_round_button.pack(side=tk.BOTTOM, pady=20)
         self.answers = {}
         self.color_map = {"w": "white", "b": "blue", "g": "green"}
 
@@ -268,6 +271,13 @@ class PlayGame(tk.Frame):
         self.set_card(card_idx)
 
     def set_card(self, card_idx):
+        self.result_frame.pack_forget()
+        self.answer.delete(0, tk.END)
+        self.submit_button.configure(state=tk.NORMAL)
+        self.answers = {}
+        for player in self.controller.players:
+            self.submission_labels[player].config(foreground="white")
+        self.game_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
         self.current_card.config(text=f"{self.cards[card_idx]}")
 
     def update_submission(self, player):
