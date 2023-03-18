@@ -1,0 +1,230 @@
+#:import window kivy.core.window.Window
+
+WindowManager:
+    HomePage:
+    HostGame:
+    JoinGame:
+    PlayGame:
+
+
+<HomePage>:
+    name: "HomePage"
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDTopAppBar:
+            title: 'Blank Slate'
+        MDBoxLayout:
+            orientation: 'vertical'
+            Image:
+                source: '../images/blank-slate.png'
+                size_hint: 1, 1
+            MDBoxLayout:
+                spacing:10
+                padding:10
+                MDRaisedButton:
+                    size_hint_x: 0.4
+                    text: 'Host Game'
+                    on_release:
+                        app.root.current = "HostGame"
+                        root.manager.transition.direction = "left"
+                MDRaisedButton:
+                    size_hint_x: 0.4
+                    text: 'Join Game'
+                    on_release:
+                        app.root.current = "JoinGame"
+                        root.manager.transition.direction = "left"
+
+
+<HostGame>:
+    name: "HostGame"
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDTopAppBar:
+            title: 'Host Game'
+        MDBoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            padding: (0, 20, 0, 0)
+            MDTextField:
+                mode: "rectangle"
+                size_hint_x:0.8
+                pos_hint: {'center_x': 0.5}
+                hint_text: 'Enter Username'
+            MDRaisedButton:
+                text: "Host"
+                pos_hint: {'center_x': 0.5}
+                on_release:
+                    root.host()
+            BoxLayout:
+                size_hint_x: 0.8
+                pos_hint: {'center_x': 0.5}
+                canvas.before:
+                    Color:
+                        rgba: 1, 0, 0, 1
+                    Line:
+                        width: 2
+                        rectangle: self.x, self.y, self.width, self.height
+                ScrollView:
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        height: root.height
+                        cols: 1
+                        size_hint: 1, None
+                        pos_hint: {'center_x': 0.5}
+                        MDLabel:
+                            text: "Host's Lobby"
+                            size_hint_y: None
+                            height: 50
+                            halign: "center"
+                        MDLabel:
+                            text: "Player 1"
+                            size_hint_y: None
+                            height: 50
+                            halign: "center"
+                        MDLabel:
+                            text: "Player 2"
+                            size_hint_y: None
+                            height: 50
+                            halign: "center"
+                        Widget:
+        MDBoxLayout:
+            spacing:10
+            padding:10
+            size_hint_y: None
+            height: 70
+            MDRaisedButton:
+                size_hint_x: 1
+                text: 'Host Game'
+                on_release:
+                    app.root.current = "PlayGame"
+                    root.manager.transition.direction = "left"
+
+
+<JoinGame>:
+    name: "JoinGame"
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDTopAppBar:
+            title: 'Join Game'
+        MDBoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            padding: (0, 20, 0, 20)
+            MDTextField:
+                mode: "rectangle"
+                size_hint_x:0.8
+                pos_hint: {'center_x': 0.5}
+                hint_text: 'Enter Username'
+            MDRaisedButton:
+                text: "Join"
+                pos_hint: {'center_x': 0.5}
+                on_release:
+                    root.join()
+            BoxLayout:
+                size_hint_x: 0.8
+                pos_hint: {'center_x': 0.5}
+                padding: 10
+                canvas.before:
+                    Color:
+                        rgba: 1, 0, 0, 1
+                    Line:
+                        width: 2
+                        rectangle: self.x, self.y, self.width, self.height
+                ScrollView:
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        height: root.height
+                        size_hint: 1, None
+                        spacing: 10
+                        MDRaisedButton:
+                            text: "Host1's Lobby"
+                            size_hint_x: 0.8
+                            pos_hint: {'center_x': 0.5}
+                        MDRaisedButton:
+                            text: "Host2's Lobby"
+                            size_hint_x: 0.8
+                            pos_hint: {'center_x': 0.5}
+                        MDRaisedButton:
+                            text: "Host3's Lobby"
+                            size_hint_x: 0.8
+                            pos_hint: {'center_x': 0.5}
+                        Widget:
+
+
+<PlayGame>:
+    name: "PlayGame"
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDBoxLayout:
+            size_hint_y: 0.8
+            padding: 10, 0, 0, 0
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.35
+                MDLabel:
+                    text: 'Player 0: 0'
+                MDLabel:
+                    text: 'Player 1: 0'
+                MDLabel:
+                    text: 'Player 1: 0'
+                MDLabel:
+                    text: 'Player 1: 0'
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.25
+                spacing: ((root.height*0.55)-(40*4))/4
+                padding: 0,0,0,root.height*0.8*0.05
+                MDIcon:
+                    icon: 'check'
+                    size_hint_y: None
+                    theme_text_color: 'Custom'
+                    text_color: 0, 1, 0, 1
+                MDIcon:
+                    icon: 'check'
+                    size_hint_y: None
+                    theme_text_color: 'Custom'
+                    text_color: 0, 1, 0, 1
+                MDIcon:
+                    icon: 'check'
+                    size_hint_y: None
+                    theme_text_color: 'Custom'
+                    text_color: 0, 1, 0, 1
+                MDIcon:
+                    icon: 'check'
+                    size_hint_y: None
+                    theme_text_color: 'Custom'
+                    text_color: 0, 1, 0, 1
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.5
+                MDLabel:
+                    text: 'Answer 1'
+                MDLabel:
+                    text: 'Answer 2'
+                MDLabel:
+                    text: 'Answer 3'
+                MDLabel:
+                    text: 'Answer 4'
+        MDBoxLayout:
+            orientation: 'vertical'
+            spacing:20
+            padding:10
+            MDLabel:
+                text: 'Blank ___'
+                halign: 'center'
+                font_name: 'Arial'
+                font_size: 40
+                bold: True
+            MDTextField:
+                mode: "rectangle"
+                size_hint_x:0.8
+                pos_hint: {'center_x': 0.5}
+                hint_text: 'Enter Answer'
+            MDRaisedButton:
+                size_hint_x: 1
+                text: 'Submit'
+                on_release:
+                    app.root.current = "PlayGame"
+                    root.manager.transition.direction = "left"
+
+
