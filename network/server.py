@@ -2,8 +2,6 @@ import socket
 import threading
 import json
 import collections
-import tkinter as tk
-from tkinter import ttk
 import time
 
 class Server:
@@ -33,7 +31,7 @@ class Server:
         message = str.encode(json.dumps({"host": socket.gethostbyname("localhost"), "name":self.host_name, "port":5555}))
         while True:
             broadcast_socket.sendto(message, ('<broadcast>', 8888))
-            time.sleep(5)
+            time.sleep(1)
             if self.STOP_BROADCAST:
                 broadcast_socket.close()
                 print("Stopped Broadcast")

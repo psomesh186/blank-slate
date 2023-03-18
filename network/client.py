@@ -1,9 +1,6 @@
 import socket
 import json
-import collections
 import threading
-import tkinter as tk
-from tkinter import ttk
 
 
 class Client:

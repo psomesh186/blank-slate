@@ -1,5 +1,3 @@
-from doctest import Example
-from email.policy import strict
 import random
 import tkinter as tk
 from tkinter import ttk
