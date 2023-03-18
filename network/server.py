@@ -28,7 +28,7 @@ class Server:
         broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         # Broadcast IP address and Username Continuously
-        message = str.encode(json.dumps({"host": socket.gethostbyname("localhost"), "name":self.host_name, "port":5555}))
+        message = str.encode(json.dumps({"host": socket.gethostbyname(socket.gethostname()), "name":self.host_name, "port":5555}))
         while True:
             broadcast_socket.sendto(message, ('<broadcast>', 8888))
             time.sleep(1)
@@ -38,7 +38,7 @@ class Server:
                 return
 
     def bind_socket(self):
-        server = 'localhost'
+        server = socket.gethostname()
         port = 5555
         server_ip = socket.gethostbyname(server)
         while True:
