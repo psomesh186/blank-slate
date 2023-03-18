@@ -12,7 +12,6 @@ import time
 
 class BlankSlate(tk.Tk):
     '''Creates main application frame and provides frame switching'''
-    cards = []
     def __init__(self):
         tk.Tk.__init__(self)
         self.title("Blank Slate")
@@ -37,6 +36,7 @@ class BlankSlate(tk.Tk):
         self.lobby = None
         self.players = collections.defaultdict(dict)
         self.id = None
+        self.win_threshold = 25
 
     def add_frame(self, frame_class, frame_name):
         frame = frame_class(self.container, self)
@@ -259,8 +259,8 @@ class PlayGame(tk.Frame):
             self.result_labels[player].pack(side=tk.LEFT)
             result_label_frame.pack()
         if self.controller.id == "Host":
-            next_round_button = ttk.Button(self.result_frame, text="Next Round", command=self.choose_card)
-            next_round_button.pack(side=tk.BOTTOM, pady=20)
+            self.next_round_button = ttk.Button(self.result_frame, text="Next Round", command=self.choose_card)
+            self.next_round_button.pack(side=tk.BOTTOM, pady=20)
         self.answers = {}
         self.color_map = {"w": "white", "b": "blue", "g": "green"}
 
@@ -325,11 +325,24 @@ class PlayGame(tk.Frame):
 
     def show_results(self, result):
         self.game_frame.pack_forget()
-        self.result_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         for player in self.controller.players:
             self.result_labels[player].configure(text=f"{result[player][0]}", foreground=self.color_map[result[player][1]])
             self.score_labels[player].configure(text=f"{result[player][2]}")
+            self.controller.players[player]["score"] = result[player][2]
+        
+        # Checking player scores for win threshold
+        winners = []
+        for player in self.controller.players:
+            if self.controller.players[player]["score"] >= self.controller.win_threshold:
+                winners.append(self.controller.players[player]["name"])
+        if len(winners) > 0:
+            if self.controller.id == "Host":
+                self.next_round_button.pack_forget()
+            winner_label = ttk.Label(self.result_frame, text=f"{', '.join(winners)} WON!!!", font=("Helvetica", 45, "bold"))
+            winner_label.pack(pady=20)
+        self.result_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+            
 
 
 if __name__ == '__main__':
