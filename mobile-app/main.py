@@ -1,3 +1,6 @@
+import collections
+import threading
+from network import server, client
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
@@ -8,7 +11,23 @@ class HomePage(MDScreen):
 
 
 class HostGame(MDScreen):
-    pass
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.player_details = collections.defaultdict(dict)
+
+    def host_game(self):
+        self.host_name = self.ids.host_name.text
+        self.ids.lobby_name.text = self.host_name + "'s Lobby"
+        self.ids.host_button.disabled = True
+        BlankSlateApp.lobby = server.Server(self.host_name, self.manager)
+        self.player_details["Host"]["name"] = self.host_name
+        self.player_details["Host"]["score"] = 0
+        threading.Thread(target=BlankSlateApp.lobby.accept_players).start()
+        self.ids.start_button.disabled = False
+
+    def start_game(self):
+        pass
 
 
 class JoinGame(MDScreen):

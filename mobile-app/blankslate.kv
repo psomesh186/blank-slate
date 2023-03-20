@@ -46,15 +46,17 @@ WindowManager:
             spacing: 20
             padding: (0, 20, 0, 0)
             MDTextField:
+                id: host_name
                 mode: "rectangle"
                 size_hint_x:0.8
                 pos_hint: {'center_x': 0.5}
                 hint_text: 'Enter Username'
             MDRaisedButton:
+                id: host_button
                 text: "Host"
                 pos_hint: {'center_x': 0.5}
                 on_release:
-                    root.host()
+                    root.host_game()
             BoxLayout:
                 size_hint_x: 0.8
                 pos_hint: {'center_x': 0.5}
@@ -72,20 +74,20 @@ WindowManager:
                         size_hint: 1, None
                         pos_hint: {'center_x': 0.5}
                         MDLabel:
-                            text: "Host's Lobby"
+                            id: lobby_name
                             size_hint_y: None
                             height: 50
                             halign: "center"
-                        MDLabel:
-                            text: "Player 1"
-                            size_hint_y: None
-                            height: 50
-                            halign: "center"
-                        MDLabel:
-                            text: "Player 2"
-                            size_hint_y: None
-                            height: 50
-                            halign: "center"
+                        # MDLabel:
+                        #     text: "Player 1"
+                        #     size_hint_y: None
+                        #     height: 50
+                        #     halign: "center"
+                        # MDLabel:
+                        #     text: "Player 2"
+                        #     size_hint_y: None
+                        #     height: 50
+                        #     halign: "center"
                         Widget:
         MDBoxLayout:
             spacing:10
@@ -93,9 +95,12 @@ WindowManager:
             size_hint_y: None
             height: 70
             MDRaisedButton:
+                id: start_button
                 size_hint_x: 1
                 text: 'Host Game'
+                disabled: True
                 on_release:
+                    root.start_game()
                     app.root.current = "PlayGame"
                     root.manager.transition.direction = "left"
 
