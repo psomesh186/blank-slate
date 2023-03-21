@@ -4,6 +4,7 @@ WindowManager:
     HomePage:
     HostGame:
     JoinGame:
+    WaitScreen:
     PlayGame:
 
 
@@ -117,15 +118,17 @@ WindowManager:
             spacing: 20
             padding: (0, 20, 0, 20)
             MDTextField:
+                id: participant_name
                 mode: "rectangle"
                 size_hint_x:0.8
                 pos_hint: {'center_x': 0.5}
                 hint_text: 'Enter Username'
             MDRaisedButton:
+                id: join_button
                 text: "Join"
                 pos_hint: {'center_x': 0.5}
                 on_release:
-                    root.join()
+                    root.join_game()
             BoxLayout:
                 size_hint_x: 0.8
                 pos_hint: {'center_x': 0.5}
@@ -138,23 +141,31 @@ WindowManager:
                         rectangle: self.x, self.y, self.width, self.height
                 ScrollView:
                     MDBoxLayout:
+                        id: lobby
                         orientation: 'vertical'
                         height: root.height
                         size_hint: 1, None
                         spacing: 10
-                        MDRaisedButton:
-                            text: "Host1's Lobby"
-                            size_hint_x: 0.8
-                            pos_hint: {'center_x': 0.5}
-                        MDRaisedButton:
-                            text: "Host2's Lobby"
-                            size_hint_x: 0.8
-                            pos_hint: {'center_x': 0.5}
-                        MDRaisedButton:
-                            text: "Host3's Lobby"
-                            size_hint_x: 0.8
-                            pos_hint: {'center_x': 0.5}
+                        # MDRaisedButton:
+                        #     text: "Host1's Lobby"
+                        #     size_hint_x: 0.8
+                        #     pos_hint: {'center_x': 0.5}
+                        # MDRaisedButton:
+                        #     text: "Host2's Lobby"
+                        #     size_hint_x: 0.8
+                        #     pos_hint: {'center_x': 0.5}
+                        # MDRaisedButton:
+                        #     text: "Host3's Lobby"
+                        #     size_hint_x: 0.8
+                        #     pos_hint: {'center_x': 0.5}
                         Widget:
+
+
+<WaitScreen>:
+    name: "WaitScreen"
+    MDLabel:
+        text: "Waiting for host to start the game..."
+        halign: "center"
 
 
 <PlayGame>:
@@ -232,5 +243,3 @@ WindowManager:
                 on_release:
                     app.root.current = "PlayGame"
                     root.manager.transition.direction = "left"
-
-

@@ -5,9 +5,9 @@ import threading
 
 class Client:
     '''Enables players to join a host's lobby'''
-    def __init__(self, client_name, controller):
+    def __init__(self, client_name, manager):
         self.client_name = client_name
-        self.controller = controller
+        self.manager = manager
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.hosts = {}
@@ -28,7 +28,7 @@ class Client:
                 if msg["host"] in self.hosts:
                     continue
                 self.hosts[msg["host"]] = msg
-                self.controller.frames["JoinGame"].add_lobby(msg["name"], msg["host"])
+                self.manager.get_screen("JoinGame").add_lobby(msg["name"], msg["host"])
             except socket.timeout:
                 pass
         broadcastSocket.close()
@@ -41,14 +41,15 @@ class Client:
                     break
                 reply = json.loads(data.decode())
                 if reply["Signal"] == "Player info":
-                    self.controller.add_players(reply["Player info"], reply["Player ID"])
-                    self.controller.switch_frame("PlayGame")
+                    self.manager.get_screen("JoinGame").add_players(reply["Player info"], reply["Player ID"])
+                    self.manager.current = "PlayGame"
+                    self.manager.transition.direction = "left"
                 elif reply["Signal"] == "Card":
-                    self.controller.frames["PlayGame"].set_card(reply["Card Index"])
+                    self.manager.get_screen("PlayGame").set_card(reply["Card Index"])
                 elif reply["Signal"] == "Update Submission":
-                    self.controller.frames["PlayGame"].update_submission(reply["Player"])
+                    self.manager.get_screen("PlayGame").update_submission(reply["Player"])
                 elif reply["Signal"] == "Results":
-                    self.controller.frames["PlayGame"].show_results(reply["Result"])
+                    self.manager.get_screen("PlayGame").show_results(reply["Result"])
             except socket.error:
                 break
 

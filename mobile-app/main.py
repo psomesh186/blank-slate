@@ -5,6 +5,7 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDRaisedButton
 from kivymd.app import MDApp
 import time
 
@@ -46,6 +47,29 @@ class HostGame(MDScreen):
 
 
 class JoinGame(MDScreen):
+    
+    def join_game(self):
+        self.participant_name = self.ids.participant_name.text
+        print(self.participant_name)
+        self.ids.join_button.disabled = True
+        BlankSlateApp.lobby = client.Client(self.participant_name, self.manager)
+        threading.Thread(target=BlankSlateApp.lobby.get_hosts).start()
+
+    def add_lobby(self, lobby_name, host):
+        button = MDRaisedButton(text=f"{lobby_name}", size_hint_x=0.8, pos_hint={'center_x': 0.5}, on_release=lambda: self.start_game(host))
+        self.ids.lobby.add_widget(button, index=1)
+    
+    def start_game(self, host):
+        BlankSlateApp.lobby.join_lobby(host)
+        self.manager.current = "WaitScreen"
+        self.manager.transition.direction = "left"
+    
+    def add_players(self, player_details, player_id):
+        BlankSlateApp.players = player_details
+        BlankSlateApp.id = player_id
+
+
+class WaitScreen(MDScreen):
     pass
 
 
@@ -86,4 +110,4 @@ class BlankSlateApp(MDApp):
         return None
 
 if __name__ == "__main__":
-    BlankSlateApp().run()
+    threading.Thread(target=BlankSlateApp().run())
