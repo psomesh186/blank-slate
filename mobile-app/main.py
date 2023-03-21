@@ -4,7 +4,9 @@ from network import server, client
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.label import MDLabel
 from kivymd.app import MDApp
+import time
 
 class HomePage(MDScreen):
     pass
@@ -27,7 +29,20 @@ class HostGame(MDScreen):
         self.ids.start_button.disabled = False
 
     def start_game(self):
-        pass
+        self.add_players(self.player_details, "Host")
+        BlankSlateApp.lobby.start_game(self.player_details)
+        time.sleep(0.1)
+        self.manager.get_screen("PlayGame").choose_card()
+    
+    def add_players(self, player_details, player_id):
+        BlankSlateApp.players = player_details
+        BlankSlateApp.id = player_id
+    
+    def add_player(self, player_name, player_id):
+        label = MDLabel(text=f"{player_name}", size_hint_y=None, height=50, halign="center")
+        self.ids.lobby.add_widget(label, index=1)
+        self.player_details[player_id]["name"] = player_name
+        self.player_details[player_id]["score"] = 0
 
 
 class JoinGame(MDScreen):
@@ -35,7 +50,9 @@ class JoinGame(MDScreen):
 
 
 class PlayGame(MDScreen):
-    pass
+    
+    def choose_card(self):
+        pass
 
 
 class WindowManager(ScreenManager):
