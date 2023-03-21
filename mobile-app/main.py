@@ -6,8 +6,10 @@ from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRaisedButton
+from kivy.clock import mainthread
 from kivymd.app import MDApp
 import time
+from functools import partial
 
 class HomePage(MDScreen):
     pass
@@ -39,6 +41,7 @@ class HostGame(MDScreen):
         BlankSlateApp.players = player_details
         BlankSlateApp.id = player_id
     
+    @mainthread
     def add_player(self, player_name, player_id):
         label = MDLabel(text=f"{player_name}", size_hint_y=None, height=50, halign="center")
         self.ids.lobby.add_widget(label, index=1)
@@ -50,23 +53,26 @@ class JoinGame(MDScreen):
     
     def join_game(self):
         self.participant_name = self.ids.participant_name.text
-        print(self.participant_name)
         self.ids.join_button.disabled = True
         BlankSlateApp.lobby = client.Client(self.participant_name, self.manager)
         threading.Thread(target=BlankSlateApp.lobby.get_hosts).start()
 
+    @mainthread
     def add_lobby(self, lobby_name, host):
-        button = MDRaisedButton(text=f"{lobby_name}", size_hint_x=0.8, pos_hint={'center_x': 0.5}, on_release=lambda: self.start_game(host))
+        button = MDRaisedButton(text=f"{lobby_name}'s Lobby", size_hint_x=0.8, pos_hint={'center_x': 0.5}, on_release=partial(self.start_game, host))
         self.ids.lobby.add_widget(button, index=1)
     
-    def start_game(self, host):
+    def start_game(self, host, _):
         BlankSlateApp.lobby.join_lobby(host)
         self.manager.current = "WaitScreen"
         self.manager.transition.direction = "left"
     
+    @mainthread
     def add_players(self, player_details, player_id):
         BlankSlateApp.players = player_details
         BlankSlateApp.id = player_id
+        self.manager.current = "PlayGame"
+        self.manager.transition.direction = "left"
 
 
 class WaitScreen(MDScreen):
@@ -110,4 +116,4 @@ class BlankSlateApp(MDApp):
         return None
 
 if __name__ == "__main__":
-    threading.Thread(target=BlankSlateApp().run())
+    BlankSlateApp().run()

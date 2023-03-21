@@ -42,8 +42,6 @@ class Client:
                 reply = json.loads(data.decode())
                 if reply["Signal"] == "Player info":
                     self.manager.get_screen("JoinGame").add_players(reply["Player info"], reply["Player ID"])
-                    self.manager.current = "PlayGame"
-                    self.manager.transition.direction = "left"
                 elif reply["Signal"] == "Card":
                     self.manager.get_screen("PlayGame").set_card(reply["Card Index"])
                 elif reply["Signal"] == "Update Submission":
