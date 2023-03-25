@@ -4,12 +4,14 @@ from network import server, client
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.label import MDLabel
+from kivymd.uix.label import MDLabel, MDIcon
 from kivymd.uix.button import MDRaisedButton
+from kivy.metrics import dp
 from kivy.clock import mainthread
 from kivymd.app import MDApp
 import time
 from functools import partial
+import random
 
 class HomePage(MDScreen):
     pass
@@ -35,7 +37,7 @@ class HostGame(MDScreen):
         self.add_players(self.player_details, "Host")
         BlankSlateApp.lobby.start_game(self.player_details)
         time.sleep(0.1)
-        self.manager.get_screen("PlayGame").choose_card()
+        self.manager.get_screen("PlayGame").choose_card(None)
     
     def add_players(self, player_details, player_id):
         BlankSlateApp.players = player_details
@@ -78,10 +80,59 @@ class JoinGame(MDScreen):
 class WaitScreen(MDScreen):
     pass
 
+from kivy.uix.button import Button
 
 class PlayGame(MDScreen):
     
-    def choose_card(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Loading cards
+        with open('cards.txt') as f:
+            self.cards = [line.strip() for line in f.readlines()]
+        self.card_idx = list(range(len(self.cards)))
+        random.shuffle(self.card_idx)
+        self.current_idx = 0
+        self.answers = {}
+
+    def on_enter(self):
+        self.create_score_table(BlankSlateApp.players)
+        self.add_buttons()
+    
+    def create_score_table(self, players):
+        self.ids.grid.cols = 3
+        self.ids.grid.rows = len(players)
+
+        for idx, player in enumerate(players):
+            label = MDLabel(text=f"{players[player]['name']}: {players[player]['score']}")
+            if player == BlankSlateApp.id:
+                label.color = (1, 0, 0, 1)
+            self.ids[f"{idx}_label"] = label
+            self.ids.grid.add_widget(label)
+            icon = MDIcon(icon='check', theme_text_color='Custom', text_color=(0, 1, 0, 1))
+            icon.opacity = 0
+            self.ids[f"{idx}_icon"] = icon
+            self.ids.grid.add_widget(icon)
+            # self.ids.grid.add_widget(Button(size_hint_x=0.1)) # use this instead of icon to visualize cell size
+            answer = MDLabel(text='', theme_text_color='Custom')
+            self.ids[f"{idx}_answer"] = answer
+            self.ids.grid.add_widget(answer)
+
+    def add_buttons(self):
+        if BlankSlateApp.id == "Host":
+            submit_button = MDRaisedButton(text="Submit", size_hint=(0.4, None), on_release=self.submit_word)
+            next_round_button = MDRaisedButton(text="Next Round", size_hint=(0.4, None), on_release=self.choose_card)
+            self.ids.buttons.add_widget(submit_button)
+            self.ids.buttons.add_widget(next_round_button)
+        else:
+            submit_button = MDRaisedButton(text="Submit", size_hint=(1, None), on_release=self.submit_word)
+            self.ids.buttons.add_widget(submit_button)
+        self.ids["submit_button"] = submit_button
+    
+    def submit_word(self, _):
+        pass
+
+    def choose_card(self, _):
         pass
 
 

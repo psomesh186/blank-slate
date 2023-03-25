@@ -52,6 +52,7 @@ WindowManager:
                 size_hint_x:0.8
                 pos_hint: {'center_x': 0.5}
                 hint_text: 'Enter Username'
+                text: "Mayu"
             MDRaisedButton:
                 id: host_button
                 text: "Host"
@@ -123,6 +124,7 @@ WindowManager:
                 size_hint_x:0.8
                 pos_hint: {'center_x': 0.5}
                 hint_text: 'Enter Username'
+                text: "Somu"
             MDRaisedButton:
                 id: join_button
                 text: "Join"
@@ -172,74 +174,78 @@ WindowManager:
     name: "PlayGame"
     MDBoxLayout:
         orientation: 'vertical'
-        MDBoxLayout:
-            size_hint_y: 0.8
-            padding: 10, 0, 0, 0
-            MDBoxLayout:
-                orientation: 'vertical'
-                size_hint_x: 0.35
-                MDLabel:
-                    text: 'Player 0: 0'
-                MDLabel:
-                    text: 'Player 1: 0'
-                MDLabel:
-                    text: 'Player 1: 0'
-                MDLabel:
-                    text: 'Player 1: 0'
-            MDBoxLayout:
-                orientation: 'vertical'
-                size_hint_x: 0.25
-                spacing: ((root.height*0.55)-(40*4))/4
-                padding: 0,0,0,root.height*0.8*0.05
-                MDIcon:
-                    icon: 'check'
-                    size_hint_y: None
-                    theme_text_color: 'Custom'
-                    text_color: 0, 1, 0, 1
-                MDIcon:
-                    icon: 'check'
-                    size_hint_y: None
-                    theme_text_color: 'Custom'
-                    text_color: 0, 1, 0, 1
-                MDIcon:
-                    icon: 'check'
-                    size_hint_y: None
-                    theme_text_color: 'Custom'
-                    text_color: 0, 1, 0, 1
-                MDIcon:
-                    icon: 'check'
-                    size_hint_y: None
-                    theme_text_color: 'Custom'
-                    text_color: 0, 1, 0, 1
-            MDBoxLayout:
-                orientation: 'vertical'
-                size_hint_x: 0.5
-                MDLabel:
-                    text: 'Answer 1'
-                MDLabel:
-                    text: 'Answer 2'
-                MDLabel:
-                    text: 'Answer 3'
-                MDLabel:
-                    text: 'Answer 4'
+        MDGridLayout:
+            id: grid
+            size_hint_y: 0.6
+        # MDBoxLayout:
+        #     size_hint_y: 0.8
+        #     padding: 10, 0, 0, 0
+        #     MDBoxLayout:
+        #         orientation: 'vertical'
+        #         size_hint_x: 0.35
+        #         MDLabel:
+        #             text: 'Player 0: 0'
+        #         MDLabel:
+        #             text: 'Player 1: 0'
+        #         MDLabel:
+        #             text: 'Player 1: 0'
+        #         MDLabel:
+        #             text: 'Player 1: 0'
+        #     MDBoxLayout:
+        #         orientation: 'vertical'
+        #         size_hint_x: 0.25
+        #         spacing: ((root.height*0.55)-(40*4))/4
+        #         padding: 0,0,0,root.height*0.8*0.05
+        #         MDIcon:
+        #             icon: 'check'
+        #             size_hint_y: None
+        #             theme_text_color: 'Custom'
+        #             text_color: 0, 1, 0, 1
+        #         MDIcon:
+        #             icon: 'check'
+        #             size_hint_y: None
+        #             theme_text_color: 'Custom'
+        #             text_color: 0, 1, 0, 1
+        #         MDIcon:
+        #             icon: 'check'
+        #             size_hint_y: None
+        #             theme_text_color: 'Custom'
+        #             text_color: 0, 1, 0, 1
+        #         MDIcon:
+        #             icon: 'check'
+        #             size_hint_y: None
+        #             theme_text_color: 'Custom'
+        #             text_color: 0, 1, 0, 1
+        #     MDBoxLayout:
+        #         orientation: 'vertical'
+        #         size_hint_x: 0.5
+        #         MDLabel:
+        #             text: 'Answer 1'
+        #         MDLabel:
+        #             text: 'Answer 2'
+        #         MDLabel:
+        #             text: 'Answer 3'
+        #         MDLabel:
+        #             text: 'Answer 4'
         MDBoxLayout:
             orientation: 'vertical'
+            size_hint_y: 0.4
             spacing:20
             padding:10
             MDLabel:
+                id: current_card
                 text: 'Blank ___'
                 halign: 'center'
                 font_name: 'Arial'
                 font_size: 40
                 bold: True
             MDTextField:
+                id: answer
                 mode: "rectangle"
                 size_hint_x:0.8
                 pos_hint: {'center_x': 0.5}
                 hint_text: 'Enter Answer'
-            MDRaisedButton:
-                size_hint_x: 1
-                text: 'Submit'
-                on_release:
-                    app.root.current = "PlayGame"
-                    root.manager.transition.direction = "left"
+            MDBoxLayout:
+                id: buttons
+                spacing:10
+                padding:10
