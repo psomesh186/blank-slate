@@ -6,7 +6,6 @@ from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel, MDIcon
 from kivymd.uix.button import MDRaisedButton
-from kivy.metrics import dp
 from kivy.clock import mainthread
 from kivymd.app import MDApp
 import time
@@ -37,7 +36,7 @@ class HostGame(MDScreen):
         self.add_players(self.player_details, "Host")
         BlankSlateApp.lobby.start_game(self.player_details)
         time.sleep(0.1)
-        self.manager.get_screen("PlayGame").choose_card(None)
+        # self.manager.get_screen("PlayGame").choose_card(None)
     
     def add_players(self, player_details, player_id):
         BlankSlateApp.players = player_details
@@ -80,7 +79,6 @@ class JoinGame(MDScreen):
 class WaitScreen(MDScreen):
     pass
 
-from kivy.uix.button import Button
 
 class PlayGame(MDScreen):
     
@@ -95,9 +93,11 @@ class PlayGame(MDScreen):
         self.current_idx = 0
         self.answers = {}
 
-    def on_enter(self):
+    def on_pre_enter(self):
         self.create_score_table(BlankSlateApp.players)
         self.add_buttons()
+        if BlankSlateApp.id == "Host":
+            self.choose_card(None)
     
     def create_score_table(self, players):
         self.ids.grid.cols = 3
@@ -130,10 +130,87 @@ class PlayGame(MDScreen):
         self.ids["submit_button"] = submit_button
     
     def submit_word(self, _):
-        pass
+        self.ids["submit_button"].disabled = True
+        if BlankSlateApp.id == "Host":
+            self.receive_word(self.ids.answer.text, "Host")
+        else:
+            BlankSlateApp.lobby.send_word(self.ids.answer.text)
+
+    def receive_word(self, word, player):
+        self.answers[player] = word
+        BlankSlateApp.lobby.update_submission(player)
+        self.update_submission(player)
+        if len(self.answers) == len(BlankSlateApp.players):
+            self.process_results()
+            return
+
+    def process_results(self):
+        words = {}
+        result = {}
+        for player, word in self.answers.items():
+            word = word.lower()
+            if word in words:
+                words[word].append(player)
+            else:
+                words[word] = [player]
+        for word, players in words.items():
+            if len(players) > 2:
+                color = (0, 0, 1, 1)
+                reward = 1
+            elif len(players) == 2:
+                color = (0, 1, 0, 1)
+                reward = 3
+            else:
+                color = (1, 1, 1, 1)
+                reward = 0
+            for player in players:
+                BlankSlateApp.players[player]["score"] += reward
+                result[player] = [word, color, BlankSlateApp.players[player]["score"]]
+        self.show_results(result)
+        BlankSlateApp.lobby.send_results(result)
+
+    @mainthread
+    def show_results(self, result):
+        for idx, player in enumerate(BlankSlateApp.players):
+            self.ids[f"{idx}_label"].text = f"{BlankSlateApp.players[player]['name']}: {result[player][2]}"
+            self.ids[f"{idx}_answer"].text = result[player][0]
+            self.ids[f"{idx}_answer"].text_color = result[player][1]
+            BlankSlateApp.players[player]["score"] = result[player][2]
+        
+        # Checking player scores for win threshold
+        winners = []
+        for player in BlankSlateApp.players:
+            if BlankSlateApp.players[player]["score"] >= BlankSlateApp.win_threshold:
+                winners.append(BlankSlateApp.players[player]["name"])
+        if len(winners) > 0:
+            if BlankSlateApp.id == "Host":
+                self.ids["next_round_button"].disabled = True
+            self.ids.current_card.text = f"{', '.join(winners)} WON!!!"
+
+    @mainthread
+    def update_submission(self, player):
+        idx = list(BlankSlateApp.players).index(player)
+        self.ids[f"{idx}_icon"].opacity = 1
 
     def choose_card(self, _):
-        pass
+        card_idx = self.card_idx[self.current_idx]
+        self.current_idx += 1
+        BlankSlateApp.lobby.send_card(card_idx)
+        self.set_card(card_idx)
+    
+    def reset_round(self):
+        for idx, player in enumerate(BlankSlateApp.players):
+            self.ids[f"{idx}_icon"].opacity = 0
+            self.ids[f"{idx}_answer"].text = ""
+            self.ids[f"{idx}_label"].text_color = (1, 1, 1, 1)
+        self.ids["submit_button"].disabled = False
+        self.ids.answer.text = ""
+        self.answers = {}
+
+    @mainthread
+    def set_card(self, card_idx):
+        self.reset_round()
+        self.ids.current_card.text = self.cards[card_idx]
 
 
 class WindowManager(ScreenManager):
@@ -160,6 +237,8 @@ class WindowManager(ScreenManager):
 
 
 class BlankSlateApp(MDApp):
+
+    win_threshold = 25
 
     def build(self):
         self.theme_cls.theme_style = "Dark"
